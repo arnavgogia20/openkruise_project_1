@@ -138,7 +138,7 @@ export const RolloutWidget = (props: {rollout: RolloutRolloutInfo; interactive?:
             <div>
                 <div className='rollout__row rollout__row--top'>
                     <div className='info rollout__info'>
-                        <div className='info__title'>Summary</div>
+                        <div className='info__title'>Workload Summary</div>
 
                         <InfoItemRow
                             items={{content: rollout.strategy, icon: iconForStrategy(rollout.strategy as Strategy), kind: rollout.strategy?.toLowerCase() as InfoItemKind}}
@@ -152,6 +152,44 @@ export const RolloutWidget = (props: {rollout: RolloutRolloutInfo; interactive?:
                                     <InfoItemRow items={{content: rollout.actualWeight, icon: 'fa-balance-scale'}} label='Actual Weight' />{' '}
                                 </React.Fragment>
                             )}
+                        </div>
+                    </div>
+
+                    <div className='info rollout__info'>
+                        <div className='info__title'>Workload Status</div>
+                        <div className='rollout__info__section'>
+                            <InfoItemRow 
+                                items={{
+                                    content: (rollout.status as any).observedGeneration || '-', 
+                                    icon: 'fa-eye'
+                                }} 
+                                label='Observed Gen' 
+                            />
+                            <InfoItemRow 
+                                items={{
+                                    content: `${(rollout.status as any).updatedReplicas || 0} / ${rollout.status?.replicas || 0}`, 
+                                    icon: 'fa-sync'
+                                }} 
+                                label='Updated Replicas' 
+                            />
+                            <InfoItemRow 
+                                items={{
+                                    content: `${(rollout.status as any).updatedReadyReplicas || 0} Ready`, 
+                                    icon: 'fa-check'
+                                }} 
+                                label='Updated Ready' 
+                            />
+                             {/* Conditions */}
+                             {(rollout.status as any).conditions?.map((c: any, i: number) => (
+                                <InfoItemRow 
+                                    key={i}
+                                    items={{
+                                        content: c.type, 
+                                        icon: c.status === 'True' ? 'fa-check-circle' : 'fa-exclamation-circle',
+                                    }} 
+                                    label='Condition' 
+                                />
+                             ))}
                         </div>
                     </div>
                     <div className='info rollout__info'>
@@ -211,7 +249,7 @@ export const RolloutWidget = (props: {rollout: RolloutRolloutInfo; interactive?:
                 <div className='rollout__row rollout__row--bottom'>
                     {rollout.replicaSets && rollout.replicaSets.length > 0 && (
                         <div className='info rollout__info rollout__revisions'>
-                            <div className='info__title'>Revisions</div>
+                            <div className='info__title'>Revision Distribution</div>
                             <div style={{marginTop: '1em'}}>
                                 {revisions.map((r, i) => (
                                     <RevisionWidget
