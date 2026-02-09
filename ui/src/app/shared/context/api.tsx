@@ -18,7 +18,9 @@ export { getApiBasePath };
 
 
 const basePath = getApiBasePath();
-export const RolloutAPI = new RolloutServiceApi(new Configuration({ basePath }));
+import { MockRolloutAPI } from '../services/mock-api';
+export const USE_MOCK_API = true;
+export const RolloutAPI = USE_MOCK_API ? (new MockRolloutAPI() as any) : new RolloutServiceApi(new Configuration({ basePath }));
 export const RolloutAPIContext = React.createContext(RolloutAPI);
 
 export const APIProvider = (props: {children: React.ReactNode}) => {

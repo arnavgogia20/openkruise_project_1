@@ -77,7 +77,7 @@ export const RolloutsTable = ({
             width: 50,
         },
         {
-            title: 'Name',
+            title: 'Workload Name',
             dataIndex: 'objectMeta',
             key: 'name',
             width: 300,
@@ -85,7 +85,15 @@ export const RolloutsTable = ({
             sorter: (a: any, b: any) => a.objectMeta.name.localeCompare(b.objectMeta.name),
         },
         {
-            title: 'Strategy',
+            title: 'Namespace',
+            dataIndex: 'objectMeta',
+            key: 'namespace',
+            width: 150,
+            render: (objectMeta: {namespace?: string}) => objectMeta.namespace,
+            sorter: (a: any, b: any) => a.objectMeta.namespace.localeCompare(b.objectMeta.namespace),
+        },
+        {
+            title: 'Update Strategy',
             dataIndex: 'strategy',
             key: 'strategy',
             align: 'left' as AlignType,
@@ -105,25 +113,18 @@ export const RolloutsTable = ({
             },
         },
         {
-            title: 'Step',
-            dataIndex: 'step',
-            key: 'step',
-            render: (text: any, record: {step?: string}) => record.step || '-',
-            sorter: (a: any, b: any) => {
-                if (a.step === undefined) {
-                    return -1;
-                }
-                if (b.step === undefined) {
-                    return 1;
-                } else return a.step.localeCompare(b.step);
+            title: 'Revisions (Current / Update)',
+            key: 'revisions',
+            render: (text: any, record: any) => {
+                const current = record.status?.currentRevision || '-';
+                const update = record.status?.updateRevision || '-';
+                return (
+                    <div>
+                        <div>Current: {current}</div>
+                        {update !== current && <div style={{color: '#1890ff'}}>Update: {update}</div>}
+                    </div>
+                );
             },
-        },
-        {
-            title: 'Weight',
-            dataIndex: 'setWeight',
-            key: 'weight',
-            render: (text: any, record: {setWeight?: number}) => record.setWeight || '-',
-            sorter: (a: any, b: any) => a.setWeight - b.setWeight,
         },
         {
             title: 'ReplicaSets',

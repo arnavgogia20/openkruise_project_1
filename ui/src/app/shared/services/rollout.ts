@@ -41,14 +41,18 @@ export const useWatchRollouts = (): ListState<RolloutInfo> => {
     const loading = useLoading(init);
 
     const [rollouts, setRollouts] = React.useState(init);
-    const liveList = useWatchList<RolloutInfo, RolloutRolloutWatchEvent>(streamUrl, findRollout, getRollout, rollouts);
+    
+    // In mock mode, we don't watch, we just use the initial fetch
+    const isMock = streamUrl.includes('mock-stream');
+    const watchedList = useWatchList<RolloutInfo, RolloutRolloutWatchEvent>(!isMock ? streamUrl : null, findRollout, getRollout, rollouts);
+    const finalList = isMock ? rollouts : watchedList;
 
     React.useEffect(() => {
         setRollouts(init);
     }, [init, loading]);
 
     return {
-        items: liveList,
+        items: finalList,
         loading,
     } as ListState<RolloutInfo>;
 };
@@ -64,11 +68,28 @@ export const useWatchRollout = (name: string, subscribe: boolean, timeoutAfter?:
         return JSON.parse(a.objectMeta.resourceVersion) === JSON.parse(b.objectMeta.resourceVersion);
     }, []);
     const streamUrl = getApiBasePath() + RolloutServiceApiFetchParamCreator().rolloutServiceWatchRolloutInfo(namespaceCtx.namespace, name).url;
-    const ri = useWatch<RolloutInfo>(streamUrl, subscribe, isEqual, timeoutAfter);
+    const isMock = streamUrl.includes('mock-stream');
+    const ri = useWatch<RolloutInfo>(!isMock ? streamUrl : null, subscribe, isEqual, timeoutAfter);
+    
+    const allRollouts = useRollouts(); // Fetch all for mock lookup
+    const mockRi = React.useMemo(() => {
+        if (isMock) {
+            return allRollouts.find(r => r.objectMeta.name === name) || ({} as RolloutInfo);
+        }
+        return null;
+    }, [allRollouts, name, isMock]);
+
     if (callback && ri.objectMeta) {
         callback(ri);
     }
+    
     const [loading, setLoading] = React.useState(true);
+    
+    if (isMock) {
+        // If mock, return the found item and loading status based on list
+        return [mockRi, allRollouts.length === 0]; // simplified loading
+    }
+
     if (ri.objectMeta && loading) {
         setLoading(false);
     }

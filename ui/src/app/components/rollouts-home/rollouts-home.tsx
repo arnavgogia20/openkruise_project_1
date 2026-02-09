@@ -137,6 +137,9 @@ export const RolloutsHome = () => {
 
     return (
         <div className='rollouts-home'>
+            <div style={{padding: '20px 20px 0 20px'}}>
+                <h1 style={{fontSize: '24px', fontWeight: 600}}>Workloads (OpenKruise-inspired View)</h1>
+            </div>
             <RolloutsToolbar rollouts={rollouts} favorites={favorites} onFilterChange={handleFilterChange} />
             <div className='rollouts-list'>
                 {loading ? (
